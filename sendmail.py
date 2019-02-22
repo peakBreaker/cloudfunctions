@@ -35,7 +35,7 @@ def send_email(toaddr='andershurum@gmail.com',
     # send the mails
     sendmsg = base_msg.format(subject=subject, msg=msg, toaddr=toaddr)
     print("sending mail \n %s" % sendmsg)
-    server.sendmail(USERNAME, toaddr, sendmsg)
+    server.sendmail(USERNAME, toaddr, sendmsg.encode("utf-8"))
 
     # Exit
     server.quit()
@@ -57,9 +57,9 @@ def hello_world(request):
             secret = bleach.clean(request.form['secret'])
             if secret == SECRET:
                 print('Sending mail')
-                recv = bleach.clean(request.form.get('toaddr', 'andershurum@gmail.com'))
+                toaddr = bleach.clean(request.form.get('toaddr', 'andershurum@gmail.com'))
                 msg = bleach.clean(request.form.get('msg', 'no provided message'))
-                send_email(toaddrs=recv, msg=msg)
+                send_email(toaddr=toaddr, msg=msg)
                 return "Correct secret, sent a message!"
             else:
                 return "You provided wrong message"
