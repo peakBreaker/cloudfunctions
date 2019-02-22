@@ -4,6 +4,8 @@
 import smtplib
 import os
 
+import bleach
+
 
 FROM_ADDR = 'noreply.peakbreaker@gmail.com'
 toaddrs = 'andershurum@gmail.com'
@@ -52,23 +54,26 @@ def hello_world(request):
         print("Got HTTP POST!")
         if request.form and 'secret' in request.form:
             print('Found secret in post')
-            print(request.form['secret'])
-            if request.form['secret'] == SECRET:
+            secret = bleach.clean(request.form['secret'])
+            if secret == SECRET:
                 print('Sending mail')
-                send_email(toaddrs=request.form.get('toaddr', 'andershurum@gmail.com'),
-                           msg=request.form.get('msg', 'no provided message'))
+                recv = bleach.clean(request.form.get('toaddr', 'andershurum@gmail.com'))
+                msg = bleach.clean(request.form.get('msg', 'no provided message'))
+                send_email(toaddrs=recv, msg=msg)
                 return "Correct secret, sent a message!"
             else:
                 return "You provided wrong message"
         else:
             return "You did not provide a secret"
     elif request.method == 'GET':
-        return """<form action="/sendmail" method="post">
+        return """<h1>CloudFun(ctions)</h1>
+                  <p>fill out the form to send emails</p>
+                  <form action="/sendmail" method="post">
                     <input type="text" name="secret" placeholder="secret"><br>
                     <input type="text" name="toaddr" placeholder="receiver"><br>
                     <input type="text" name="msg" placeholder="message"><br>
                     <input type="submit">
-                   </form>"""
+                  </form>"""
     else:
         return 'Invalid HTTP arg'
 
